@@ -1,5 +1,5 @@
 name: Globals
 values:
   - key: jwt_token
-    value: ''
+    value: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiaWF0IjoxNzkwMDc3OTkzLCJleHAiOjE3OTAwODUxOTN9.fWU4tiB4YDalAJ9wiVYduq28j1RRm6_RvltnyP6pqkY'
     enabled: true
