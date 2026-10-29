@@ -5,7 +5,7 @@ const createMeta = (): ResponseMeta => ({
     timestamp: new Date().toISOString()
 });
 
-export const sendSuccess = <T = unknown>(res: Response, message: string, data: T, status = 200): void => {
+export const sendSuccess = <T = unknown>(res: Response, message: string, data?: T, status = 200): void => {
     res.status(status).json({
         success: true,
         message,

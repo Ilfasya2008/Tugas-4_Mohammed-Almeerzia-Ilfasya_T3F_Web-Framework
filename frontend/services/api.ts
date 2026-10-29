@@ -1,4 +1,5 @@
-export const API_BASE_URL = 'https://dummyjson.com';
+export const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export class ApiError extends Error {
     status: number;
@@ -15,26 +16,37 @@ export class ApiError extends Error {
 export async function apiClient<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
 
-    const defaultHeaders: HeadersInit = {
+    const headers: Record<string, string> = {
         'Content-Type': 'application/json',
     };
+
+    if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('token');
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+    }
 
     try {
         const response = await fetch(url, {
             ...options,
             headers: {
-                ...defaultHeaders,
-                ...options.headers,
+                ...headers,
+                ...(options.headers as Record<string, string> | undefined),
             },
-            next: { revalidate: 60 },
         });
 
         if (!response.ok) {
-            throw new ApiError(
-                `HTTP Error: Gagal memuat data dari ${endpoint} (${response.status} ${response.statusText})`,
-                response.status,
-                response.statusText
-            );
+            let errorMessage = `HTTP Error: Gagal memuat data dari ${endpoint} (${response.status} ${response.statusText})`;
+            try {
+                const errorData = await response.json();
+                if (errorData && errorData.message) {
+                    errorMessage = errorData.message;
+                }
+            } catch {
+                // Ignore json parse error if response is not JSON
+            }
+            throw new ApiError(errorMessage, response.status, response.statusText);
         }
 
         const data: T = await response.json();
